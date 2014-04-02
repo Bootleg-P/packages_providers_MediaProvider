@@ -4375,9 +4375,18 @@ public class MediaProvider extends ContentProvider {
                         if (file.exists()) {
                             FileInputStream stream = null;
                             try {
-                                compressed = new byte[(int)file.length()];
-                                stream = new FileInputStream(file);
-                                stream.read(compressed);
+
+                                if (file.length() > 0 && file.length() < MAX_ALBUMTHUMBNAIL_FILE_SIZE) {
+                                    compressed = new byte[(int)file.length()];
+                                } else {
+                                    Log.d(TAG, "[getCompressedAlbumArt] bestmatch:" + bestmatch + ", file length: " + file.length());
+                                }
+
+                                if (compressed != null) {
+                                    stream = new FileInputStream(file);
+                                    stream.read(compressed);
+                                }
+
                             } catch (IOException ex) {
                                 compressed = null;
                             } catch (OutOfMemoryError ex) {
@@ -4997,6 +5006,9 @@ public class MediaProvider extends ContentProvider {
 
     // path for writing contents of in memory temp database
     private String mTempDatabasePath;
+
+    // set maximum album thumbnail file size for FULL HD 32 bit bimap (1920*1080*4)
+    private static int MAX_ALBUMTHUMBNAIL_FILE_SIZE = 8 * 1024 * 1024;
 
     // WARNING: the values of IMAGES_MEDIA, AUDIO_MEDIA, and VIDEO_MEDIA and AUDIO_PLAYLISTS
     // are stored in the "files" table, so do not renumber them unless you also add
